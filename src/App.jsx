@@ -1,79 +1,82 @@
-import CrossIcon from './components/icons/CrossIcon';
-import MoonIcon from './components/icons/MoonIcon';
+import { useEffect, useState } from 'react';
+import Header from './components/Header';
+import TodoComputed from './components/TodoComputed';
+import TodoCreate from './components/TodoCreate';
+import TodoFilter from './components/TodoFilter';
+import TodoList from './components/TodoList';
+
+const initialStateTodos = JSON.parse(localStorage.getItem('todos')) || [];
 
 const App = () => {
+    const [todos, setTodos] = useState(initialStateTodos);
+
+    useEffect(() => {
+        localStorage.setItem('todos', JSON.stringify(todos));
+    }, [todos]);
+
+    const createTodo = (title) => {
+        const newTodo = {
+            id: Date.now(),
+            title: title.trim(),
+            complete: false,
+        };
+        setTodos([...todos, newTodo]);
+    };
+
+    const removeTodo = (id) => {
+        setTodos(todos.filter((todo) => todo.id !== id));
+    };
+
+    const updateTodo = (id) => {
+        setTodos(
+            todos.map((todo) =>
+                todo.id === id ? { ...todo, complete: !todo.complete } : todo
+            )
+        );
+    };
+
+    const computedItemsLeft = todos.filter((todo) => !todo.complete).length;
+
+    const clearComplete = () => {
+        setTodos(todos.filter((todo) => !todo.complete));
+    };
+
+    const [filter, setFilter] = useState('all');
+
+    const filteredTodos = () => {
+        switch (filter) {
+            case 'all':
+                return todos;
+            case 'active':
+                return todos.filter((todo) => !todo.complete);
+            case 'complete':
+                return todos.filter((todo) => todo.complete);
+            default:
+                return todos;
+        }
+    };
+
+    const changeFilter = (filter) => setFilter(filter);
+
     return (
-        <div className="bg-[url('./assets/images/bg-mobile-light.jpg')] bg-no-repeat bg-contain min-h-screen bg-gray-300">
-            <header className='container mx-auto px-4 pt-8'>
-                <div className='flex justify-between'>
-                    <h1 className='uppercase text-white text-3xl font-semibold tracking-[0.3em]'>
-                        todo
-                    </h1>
-                    <button>
-                        <MoonIcon className='fill-red-400' />
-                    </button>
-                </div>
-                <form className='bg-white rounded-md overflow-hidden py-4 flex gap-4 items-center px-4 mt-8'>
-                    <span className='rounded-full border-2 inline-block w-5 h-5'></span>
-                    {/* elementos de linea no se le puede aplicar ancho y alto, por esta razon se aplico inline-block, para que sea un elemento de bloque */}
-                    <input
-                        type='text'
-                        placeholder='Create a new todo...'
-                        className='w-full text-gray-400 outline-none'
-                    />
-                </form>
-            </header>
-            <main className='container mx-auto px-4 mt-8'>
-                <div className='bg-white rounded-md [&>article]:p-4'>
-                    <article className='flex gap-4 items-center border-b-gray-400 border-b'>
-                        <button className='rounded-full border-2 inline-block w-5 h-5'></button>
-                        <p className='text-gray-500 grow'>
-                            Compelte online javascript
-                        </p>
-                        <button className='flex-none'>
-                            <CrossIcon />
-                        </button>
-                    </article>
-                    <article className='flex gap-4 items-center border-b-gray-400 border-b'>
-                        <button className='rounded-full border-2 inline-block w-5 h-5'></button>
-                        <p className='text-gray-500 grow'>
-                            Compelte online javascript
-                        </p>
-                        <button className='flex-none'>
-                            <CrossIcon />
-                        </button>
-                    </article>
-                    <article className='flex gap-4 items-center border-b-gray-400 border-b'>
-                        <button className='rounded-full border-2 inline-block w-5 h-5'></button>
-                        <p className='text-gray-500 grow'>
-                            Compelte online javascript
-                        </p>
-                        <button className='flex-none'>
-                            <CrossIcon />
-                        </button>
-                    </article>
-                    <section className='py-4 px-4 flex justify-between'>
-                        <span className='text-gray-400'>5 items left</span>
-                        <button className='text-gray-400'>
-                            Clear Completed
-                        </button>
-                    </section>
-                </div>
+        <div className="bg-[url('./assets/images/bg-mobile-light.jpg')] bg-no-repeat bg-contain min-h-screen bg-gray-300 transition-all duration-300 dark:bg-gray-800 dark:bg-[url('./assets/images/bg-mobile-dark.jpg')] md:bg-[url('./assets/images/bg-desktop-light.jpg')] md:dark:md:bg-[url('./assets/images/bg-desktop-dark.jpg')]">
+            <Header />
+            <main className='container mx-auto px-4 mt-8 md:max-w-xl'>
+                <TodoCreate createTodo={createTodo} />
+                <TodoList
+                    todos={filteredTodos()}
+                    updateTodo={updateTodo}
+                    removeTodo={removeTodo}
+                />
+                <TodoComputed
+                    computedItemsLeft={computedItemsLeft}
+                    clearComplete={clearComplete}
+                />
+                <TodoFilter changeFilter={changeFilter} filter={filter} />
             </main>
-            <section className='container mx-auto px-4'>
-                <div className='bg-white mt-8 p-4 rounded-md flex justify-center gap-4'>
-                    <button className='text-blue-600 transition-all'>
-                        All
-                    </button>
-                    <button className='transition-all hover:text-blue-600'>
-                        Active
-                    </button>
-                    <button className='transition-all hover:text-blue-600'>
-                        Completed
-                    </button>
-                </div>
-            </section>
-            <p className='text-center mt-8'>Drag and drop to reorder list</p>
+            <footer className='text-center mt-8 transition-all duration-300 dark:text-gray-400'>
+                Drag and drop to reorder list
+            </footer>
         </div>
     );
 };
