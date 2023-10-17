@@ -1,9 +1,11 @@
 import CrossIcon from './icons/IconCross';
 import IconCheck from './icons/IconCheck';
-const TodoItem = ({ todos, removeTodo, updateTodo }) => {
+import React from 'react';
+
+const TodoItem = React.forwardRef(function TodoItem({ todos, removeTodo, updateTodo, ...props }, ref) {
     const { id, title, complete } = todos;
     return (
-        <article className='flex gap-4 items-center border-b-gray-400 border-b transition-all duration-300 dark:bg-gray-700'>
+        <article {...props} ref={ref} className='flex gap-4 items-center border-b-gray-400 border-b transition-all duration-300 dark:bg-gray-700'>
             <button
                 className={`rounded-full border-2 w-5 h-5 ${
                     complete
@@ -22,6 +24,6 @@ const TodoItem = ({ todos, removeTodo, updateTodo }) => {
             </button>
         </article>
     );
-};
+});
 
 export default TodoItem;
